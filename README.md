@@ -1,8 +1,6 @@
-# nodalli
-Nodalli x Utesca
-
-
 # Automated Contact Scraper for Nodalli
+
+Nodalli x Utesca
 
 ## Project Overview
 
@@ -33,3 +31,33 @@ This project aims to develop an **automated contact scraping tool** to improve N
 1. Clone this repository:
    ```bash
    git clone https://github.com/danielmrtnvc/nodalli.git
+
+
+# Milestones
+
+    - [x] Structure Team
+    - [ ] Initial Prototype: December 2024
+    - [ ] Beta Testing: February 2025
+    - [ ] Final Deliverable: April 2025
+
+---
+
+## Contributing
+
+Teamwork makes the dream work! Please follow these steps:
+
+    1. 1Fork this repository.
+    1. Create a feature branch: git checkout -b feature-name
+    1. Commit your changes: git commit -m "Add feature"
+    1. Push to the branch: git push origin feature-name
+    1. Submit a pull request.
+
+## Contact
+
+For questions or support, reach out to the Nodalli team:
+
+- **Email**: [info@nodalli.com](mailto:info@nodalli.com)
+- **Website**: [nodalli.com](https://nodalli.com)
+- **LinkedIn**: [Nodalli](https://www.linkedin.com/company/nodalli)
+
+
