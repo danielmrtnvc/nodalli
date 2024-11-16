@@ -46,11 +46,11 @@ This project aims to develop an **automated contact scraping tool** to improve N
 
 Teamwork makes the dream work! Please follow these steps:
 
-    1. 1Fork this repository.
-    1. Create a feature branch: git checkout -b feature-name
-    1. Commit your changes: git commit -m "Add feature"
-    1. Push to the branch: git push origin feature-name
-    1. Submit a pull request.
+    1. Fork this repository.
+    2. Create a feature branch: git checkout -b feature-name
+    3. Commit your changes: git commit -m "Add feature"
+    4. Push to the branch: git push origin feature-name
+    5. Submit a pull request.
 
 ## Contact
 
