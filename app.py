@@ -25,6 +25,7 @@ def save_to_excel(name, email, message):
     # Save the DataFrame to the Excel file
     df.to_excel(excel_file_path, index=False)
     logging.info(f"Data saved to Excel: Name: {name}, Email: {email}, Message: {message}")
+
 @app.route('/submit_form', methods=['POST'])
 def submit_form():
     try:
@@ -68,3 +69,35 @@ def submit_form():
 if __name__ == '__main__':
     # Make sure Flask listens on all IP addresses
     app.run(debug=True, host='0.0.0.0', port=50)
+
+
+
+# Norbert
+# Something like:
+# MAKE_WEBHOOK_URL = "https://hook.integromat.com/unique-webhook-id"
+
+# @app.route('/send-data', methods=['POST'])
+# def send_csv_to_make():
+    # Example data to convert into CSV
+    # data = [
+    #     {"user_id": 1, "name": "John Doe", "email": "johndoe@example.com"},
+    #     {"user_id": 2, "name": "Jane Smith", "email": "janesmith@example.com"},
+    # ]
+
+    # Convert data to CSV
+    # csv_buffer = io.StringIO()
+    # writer = csv.DictWriter(csv_buffer, fieldnames=["user_id", "name", "email"])
+    # writer.writeheader()
+    # writer.writerows(data)
+    # csv_data = csv_buffer.getvalue()
+
+    # Send CSV to Make.com webhook
+    # headers = {
+    #     "Content-Type": "text/csv"
+    # }
+    # response = requests.post(MAKE_WEBHOOK_URL, data=csv_data, headers=headers)
+
+    # if response.status_code == 200:
+    #     return jsonify({"message": "CSV sent to Make.com successfully!"}), 200
+    # else:
+    #     return jsonify({"error": "Failed to send CSV", "details": response.text}), 500
