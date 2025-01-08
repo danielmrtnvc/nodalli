@@ -1,6 +1,7 @@
+
 import json
 import logging
-import pandas as pd
+import pymysql
 from flask import Flask, request, jsonify
 
 # Setup logging
@@ -8,31 +9,49 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
-# Path to the Excel file where data will be saved
-excel_file_path = 'form_data.xlsx'
+# MySQL database connection details
+MYSQL_HOST = 'localhost'  # Replace with your host
+MYSQL_USER = 'root'       # Replace with your username
+MYSQL_PASSWORD = '18002672001'  # Replace with your password
+MYSQL_DB = 'form_data_db'  # Replace with your database name
 
-def save_to_excel(name, email, message):
-    # Create a DataFrame with the new data
-    new_data = pd.DataFrame([[name, email, message]], columns=['Name', 'Email', 'Message'])
+# Function to save form data to the MySQL database
+def save_to_mysql(name, email, message):
     try:
-        # Try to load the existing Excel file if it exists
-        df = pd.read_excel(excel_file_path)
-        # Append the new data
-        df = pd.concat([df, new_data], ignore_index=True)
-    except FileNotFoundError:
-        # If the file does not exist, start a new DataFrame
-        df = new_data
-    # Save the DataFrame to the Excel file
-    df.to_excel(excel_file_path, index=False)
-    logging.info(f"Data saved to Excel: Name: {name}, Email: {email}, Message: {message}")
+        # Connect to the MySQL database
+        connection = pymysql.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DB
+        )
+
+        with connection.cursor() as cursor:
+            # Create the SQL query to insert data
+            query = "INSERT INTO form_data (name, email, message) VALUES (%s, %s, %s)"
+            cursor.execute(query, (name, email, message))
+
+            # Commit the changes to the database
+            connection.commit()
+
+        logging.info(f"Data saved to MySQL: Name: {name}, Email: {email}, Message: {message}")
+
+    except Exception as e:
+        logging.error(f"Error saving to database: {e}")
+    finally:
+        if connection:
+            connection.close()
+
 @app.route('/submit_form', methods=['POST'])
 def submit_form():
     try:
         # Log the incoming form data for debugging
         logging.debug("Received form data: %s", request.form)
         logging.debug("Raw request data: %s", request.form.get('rawRequest'))
+
         # Get the raw request data (which is a JSON string)
         raw_request = request.form.get('rawRequest')
+
         # If the raw request exists, parse it
         if raw_request:
             data = json.loads(raw_request)
@@ -50,13 +69,13 @@ def submit_form():
             if not message:
                 return jsonify({"error": "Missing message"}), 400
 
-            # Save the data to the Excel file
-            save_to_excel(name, email, message)
+            # Save the data to the MySQL database
+            save_to_mysql(name, email, message)
 
-            # Log the form data (instead of inserting into MySQL)
+            # Log the form data (now saved to MySQL)
             logging.info(f"Received data - Name: {name}, Email: {email}, Message: {message}")
 
-            # Return a success response (without database insertion)
+            # Return a success response
             return jsonify({"message": "Data processed successfully!", "data": {"name": name, "email": email, "message": message}}), 200
         else:
             logging.error("No raw request data found.")
@@ -65,6 +84,7 @@ def submit_form():
         # Log the error for debugging
         logging.error("Error occurred: %s", e)
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
 if __name__ == '__main__':
     # Make sure Flask listens on all IP addresses
     app.run(debug=True, host='0.0.0.0', port=50)
