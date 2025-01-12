@@ -1,67 +1,83 @@
 
+"""
+Try sending the request from the same machine running the Flask server 
+(using localhost or 127.0.0.1 instead of 100.67.80.59):
+
+curl: curl -X POST http://127.0.0.1:5000/submit_form -H "Content-Type: application/x-www-form-urlencoded" -d "rawRequest={\"q12_name\":\"John Doe\",\"q13_email\":\"john.doe@example.com\",\"q16_message\":\"This is a test message\"}"
+
+"""
+
 import json
 import logging
-import pymysql
+import os
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+# Load environment variables from .env
+load_dotenv(dotenv_path="C:\\Users\\ahmed\\APS105\\webhook-nod\\nodali.env")
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
 
+# Flask app setup
 app = Flask(__name__)
 
-# MySQL database connection details
-MYSQL_HOST = 'localhost'  # Replace with your host
-MYSQL_USER = 'root'       # Replace with your username
-MYSQL_PASSWORD = '18002672001'  # Replace with your password
-MYSQL_DB = 'form_data_db'  # Replace with your database name
+# Supabase credentials from .env
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-# Function to save form data to the MySQL database
-def save_to_mysql(name, email, message):
+# Initialize Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Function to save form data to Supabase
+def save_to_supabase(name, email, message):
     try:
-        # Connect to the MySQL database
-        connection = pymysql.connect(
-            host=MYSQL_HOST,
-            user=MYSQL_USER,
-            password=MYSQL_PASSWORD,
-            database=MYSQL_DB
-        )
+        # Insert data into the "form_data" table
 
-        with connection.cursor() as cursor:
-            # Create the SQL query to insert data
-            query = "INSERT INTO form_data (name, email, message) VALUES (%s, %s, %s)"
-            cursor.execute(query, (name, email, message))
-
-            # Commit the changes to the database
-            connection.commit()
-
-        logging.info(f"Data saved to MySQL: Name: {name}, Email: {email}, Message: {message}")
+        response = supabase.table("form_data").insert({
+            "name": name,
+            "email": email,
+            "message": message
+        }).execute()
+        
+        # Check if the response has status_code and handle it
+        if hasattr(response, 'status_code'):
+            if response.status_code == 201:
+                logging.info(f"Data saved to Supabase: Name: {name}, Email: {email}, Message: {message}")
+                return True
+            else:
+                logging.error(f"Failed to save data: {response.json()}")
+                return False
+        else:
+            logging.error(f"Response does not have a status code. Response: {response}")
+            return False
 
     except Exception as e:
-        logging.error(f"Error saving to database: {e}")
-    finally:
-        if connection:
-            connection.close()
+        logging.error(f"Error saving to Supabase: {e}")
+        return False
 
 @app.route('/submit_form', methods=['POST'])
 def submit_form():
     try:
-        # Log the incoming form data for debugging
+        # Log the incoming form data
         logging.debug("Received form data: %s", request.form)
-        logging.debug("Raw request data: %s", request.form.get('rawRequest'))
-
-        # Get the raw request data (which is a JSON string)
         raw_request = request.form.get('rawRequest')
 
-        # If the raw request exists, parse it
         if raw_request:
-            data = json.loads(raw_request)
+            # Parse the raw request JSON
+            try:
+                data = json.loads(raw_request)
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON decoding failed: {e}")
+                return jsonify({"error": "Invalid JSON format"}), 400
 
-            # Extract the relevant fields from the parsed JSON
+            # Extract fields from the parsed JSON
             name = data.get('q12_name')
             email = data.get('q13_email')
             message = data.get('q16_message')
 
-            # Check if required fields are present
+            # Validate required fields
             if not name:
                 return jsonify({"error": "Missing name"}), 400
             if not email:
@@ -69,22 +85,26 @@ def submit_form():
             if not message:
                 return jsonify({"error": "Missing message"}), 400
 
-            # Save the data to the MySQL database
-            save_to_mysql(name, email, message)
-
-            # Log the form data (now saved to MySQL)
-            logging.info(f"Received data - Name: {name}, Email: {email}, Message: {message}")
-
-            # Return a success response
-            return jsonify({"message": "Data processed successfully!", "data": {"name": name, "email": email, "message": message}}), 200
+            # Save the data to Supabase
+            if save_to_supabase(name, email, message):
+                logging.debug("Data saved to Supabase successfully.")
+                # Success response
+                return jsonify({"message": "Data processed successfully!", "data": {"name": name, "email": email, "message": message}}), 200
+            else:
+                logging.error("Failed to save data to Supabase.")
+                # Failure response
+                return jsonify({"error": "Failed to save data to database"}), 500
         else:
             logging.error("No raw request data found.")
             return jsonify({"error": "No raw request data found."}), 400
     except Exception as e:
-        # Log the error for debugging
+        # Log the error
         logging.error("Error occurred: %s", e)
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
+
+# Main entry point
 if __name__ == '__main__':
-    # Make sure Flask listens on all IP addresses
-    app.run(debug=True, host='0.0.0.0', port=50)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
+
