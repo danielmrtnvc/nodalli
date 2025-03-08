@@ -8,6 +8,7 @@ from cookies import input_with_browser
 import time
 import json
 from apify_client import ApifyClient
+import time 
 
 # Apify API Token
 TOKEN = 'apify_api_d0637a4bRXhqGvBGFedZTl4vK6Qiv71xtUbw'
@@ -19,7 +20,7 @@ APOLLO_PASSWORD = "utescaNodalli11235apollo!"
 # Set up Selenium WebDriver
 print("🚀 Setting up Selenium...")
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # Remove this if you want to see the browser
+# Remove this if you want to see the browser
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
@@ -89,7 +90,7 @@ try:
 
     # UNCOMMENT BELOW TO TEST WITH MANUAL BROWSER COOKIES
     # input_data = input_with_browser()
-    
+
     call_result = actor_client.call(run_input=input_data)
     if call_result is None:
         print('❌ Actor run failed.')
