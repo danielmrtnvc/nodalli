@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from cookies import input_with_browser
 import time
 import json
 from apify_client import ApifyClient
@@ -85,8 +86,11 @@ try:
     }
 
     print("🚀 Starting Apollo scraper actor...")
-    call_result = actor_client.call(run_input=input_data)
 
+    # UNCOMMENT BELOW TO TEST WITH MANUAL BROWSER COOKIES
+    # input_data = input_with_browser()
+    
+    call_result = actor_client.call(run_input=input_data)
     if call_result is None:
         print('❌ Actor run failed.')
         driver.quit()
