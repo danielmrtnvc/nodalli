@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 import os
 from dotenv import load_dotenv
-from fetch_leads import fetch_leads
+from fetch_leads import fetch_and_send
 
 load_dotenv()
 
@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 # Supabase API details
-  # Keep this secret!
 SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_TABLE = "form_data"
@@ -111,7 +110,7 @@ def submit_form():
         # Handle Supabase response
         if response.status_code in [200, 201]:
             logging.info("Data saved successfully!")
-            leads = fetch_leads()
+            leads = fetch_and_send(extracted_data)
             # Log or return lead data if needed
             logging.info(f"Fetched {len(leads)} leads from Apollo.")
             return jsonify({"message": "Data saved successfully!", "leads_count": len(leads)}), 200
