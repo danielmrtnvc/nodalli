@@ -3,6 +3,10 @@ import logging
 import requests
 from datetime import datetime
 from flask import Flask, request, jsonify
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -10,8 +14,9 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 # Supabase API details
-SUPABASE_URL = "https://nifvuvksezrvlididxmq.supabase.co"
-SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pZnZ1dmtzZXpydmxpZGlkeG1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUzNDAyOTMsImV4cCI6MjA1MDkxNjI5M30.iiSvxsIH0A8h96udUyeNognYbDGoEcIx1UB6TDgxEU8"  # Keep this secret!
+  # Keep this secret!
+SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_TABLE = "form_data"
 
 # Supabase REST API endpoint
