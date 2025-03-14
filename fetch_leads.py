@@ -31,8 +31,9 @@ def build_apollo_search_url(job_titles, location, company_size, industry):
     company_size_str = f"organizationNumEmployeesRanges[]={company_size.replace('Micro (', '').replace(' employees)', '')}" 
     industry_str = f"qOrganizationKeywordTags[]={quote_plus(industry)}"
     # Combine all parameters
-    search_url = f"{base_url}&{job_titles_str}&{location_str}&{company_size_str}&{industry_str}"
-    return search_url
+    search_url = f"{base_url}&{job_titles_str}&{location_str}&{company_size_str}"
+    hard_code = "https://app.apollo.io/#/people?page=1&sortByField=recommendations_score&sortAscending=false&personTitles[]=Game%20Developer&personLocations[]=Toronto"
+    return hard_code
 
 def fetch_and_send(data):
     try:
@@ -55,7 +56,7 @@ def fetch_and_send(data):
             "email": APOLLO_EMAIL,
             "password": APOLLO_PASSWORD,
             "count": 1,
-            "getEmails": True,
+            "getEmails": False,
             "guessedEmails": False,
             "proxy": {
                 "useApifyProxy": True,
@@ -96,9 +97,9 @@ def fetch_and_send(data):
             writer.writeheader()
             writer.writerows(csv_data)
         print(f"📂 Leads saved to {csv_filename}")
+        webhook_url = "https://hook.us2.make.com/j27vxnv4bqy4y7nxaxmh6hfdir97x0qf"
         with open(csv_filename, "rb") as file:
             response = requests.post(webhook_url, files={"file": csv_filename})
-        webhook_url = "https://hook.us2.make.com/j27vxnv4bqy4y7nxaxmh6hfdir97x0qf"
         if response.status_code == 200:
             print("File sent successfully!")
         else:
