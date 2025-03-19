@@ -7,7 +7,7 @@ import csv
 from urllib.parse import quote_plus
 import requests
 
-start_time = time.time()
+
 load_dotenv()
 
 # Apify API Token
@@ -24,7 +24,7 @@ def clean_field(value):
     return str(value).strip().replace("[", "").replace("]", "")
 
 def build_apollo_search_url(job_titles, location, company_size, industry):
-    base_url = "https://app.apollo.io/#/people?sortByField=recommendations_score&sortAscending=false&page=1"
+    base_url = "https://app.apollo.io/#/people?page=1&sortByField=recommendations_score&sortAscending=false"
     job_titles_str = "&".join([f"personTitles[]={quote_plus(title)}" for title in job_titles])
     location_str = f"personLocations[]={quote_plus(location)}"
     # Convert company size to Apollo's format (assuming size is a range like "1,10")
@@ -32,10 +32,11 @@ def build_apollo_search_url(job_titles, location, company_size, industry):
     industry_str = f"qOrganizationKeywordTags[]={quote_plus(industry)}"
     # Combine all parameters
     search_url = f"{base_url}&{job_titles_str}&{location_str}&{company_size_str}"
-    hard_code = "https://app.apollo.io/#/people?page=1&sortByField=recommendations_score&sortAscending=false&personTitles[]=Game%20Developer&personLocations[]=Toronto"
-    return hard_code
+    # hard_code = "https://app.apollo.io/#/people?page=1&sortByField=recommendations_score&sortAscending=false&personTitles[]=Game%20Developer&personLocations[]=Toronto"
+    return search_url
 
 def fetch_and_send(data):
+    start_time = time.time()
     try:
         industry = data.get("preferred_industries", "")
         company_size = data.get("preferred_company_size", "")
@@ -55,7 +56,7 @@ def fetch_and_send(data):
             # "cookie": formatted_cookies,
             "email": APOLLO_EMAIL,
             "password": APOLLO_PASSWORD,
-            "count": 1,
+            "count": 100,
             "getEmails": False,
             "guessedEmails": False,
             "proxy": {
@@ -104,8 +105,10 @@ def fetch_and_send(data):
             print("File sent successfully!")
         else:
             print(f"Failed to send file. Status code: {response.status_code}, Response: {response.text}")
+        end_time = time.time()
+        total_time = end_time - start_time
+        print(f"⏰ Total execution time: {total_time:.2f} seconds.")
+        return len(list_items_result)
     except Exception as e:
         print(f"❌ Error: {e}")
-    end_time = time.time()
-    total_time = end_time - start_time
-    print(f"⏰ Total execution time: {total_time:.2f} seconds.")
+        return 0
