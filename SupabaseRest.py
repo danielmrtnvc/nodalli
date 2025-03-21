@@ -35,7 +35,9 @@ def format_date(date_dict):
     except ValueError:
         logging.error(f"Invalid date format: {date_dict}")
         return None
-
+@app.route('/')
+def index():
+    return "Hello, World!"
 @app.route('/submit_form', methods=['POST'])
 def submit_form():
     try:
@@ -123,4 +125,5 @@ def submit_form():
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=50)
+    # app.run(debug=True, host='0.0.0.0', port=50)
+    app.run()
